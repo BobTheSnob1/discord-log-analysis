@@ -8,17 +8,22 @@ file_paths = ["announcements.json", "event-news.json"]
 
 for file_path in file_paths:
     plt.clf()
-    with open(file_path, 'r', encoding='utf-8') as file:
+    with open(file_path, "r", encoding="utf-8") as file:
         data = json.load(file)
 
-    timestamps = [msg['timestamp'] for msg in data.get('messages', [])]
+    timestamps = [msg["timestamp"] for msg in data.get("messages", [])]
 
-    weekdays = [datetime.fromisoformat(ts).strftime('%A') for ts in timestamps]
+    weekdays = [datetime.fromisoformat(ts).strftime("%A") for ts in timestamps]
     weekday_counts = Counter(weekdays)
 
     ordered_weekdays = [
-        'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday',
-        'Saturday', 'Sunday'
+        "Monday",
+        "Tuesday",
+        "Wednesday",
+        "Thursday",
+        "Friday",
+        "Saturday",
+        "Sunday",
     ]
     ordered_counts = [weekday_counts.get(day, 0) for day in ordered_weekdays]
     plt.bar(ordered_weekdays, ordered_counts)
@@ -28,3 +33,23 @@ for file_path in file_paths:
     plt.xticks(rotation=45)
     plt.tight_layout()
     plt.savefig(file_path.split(".")[0] + "_weekday_distribution.png")
+    # Messages per month over the last 12 months
+    plt.clf()
+    current_date = datetime.now()
+    last_12_months = [(current_date.year, current_date.month - i) for i in range(12)]
+    last_12_months = [(y, m + 12) if m <= 0 else (y, m) for y, m in last_12_months]
+    last_12_months.reverse()
+
+    month_years = [datetime(y, m, 1).strftime("%Y-%m") for y, m in last_12_months]
+    month_counts = Counter(
+        datetime.fromisoformat(ts).strftime("%Y-%m") for ts in timestamps
+    )
+
+    ordered_month_counts = [month_counts.get(month, 0) for month in month_years]
+    plt.bar(month_years, ordered_month_counts)
+    plt.title("Messages Sent Per Month in #" + file_path.split(".")[0])
+    plt.xlabel("Month")
+    plt.ylabel("Number of Messages")
+    plt.xticks(rotation=45)
+    plt.tight_layout()
+    plt.savefig(file_path.split(".")[0] + "_monthly_distribution.png")
